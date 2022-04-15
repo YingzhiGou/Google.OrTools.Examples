@@ -30,8 +30,29 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="util\optional_boolean.proto" />
+    <None Include="sat\sat_parameters.proto" />
+    <None Include="sat\cp_model_service.proto" />
+    <None Include="sat\cp_model.proto" />
+    <None Include="sat\boolean_problem.proto" />
+    <None Include="pdlp\solve_log.proto" />
+    <None Include="pdlp\solvers.proto" />
+    <None Include="orLogo.png" />
+    <None Include="linear_solver\linear_solver.proto" />
+    <None Include="graph\flow_problem.proto" />
+    <None Include="glop\parameters.proto" />
+    <None Include="constraint_solver\solver_parameters.proto" />
+    <None Include="constraint_solver\search_stats.proto" />
+    <None Include="constraint_solver\search_limit.proto" />
+    <None Include="constraint_solver\routing_parameters.proto" />
+    <None Include="constraint_solver\routing_enums.proto" />
+    <None Include="constraint_solver\demon_profiler.proto" />
+    <None Include="constraint_solver\assignment.proto" />
+    <None Include="bop\bop_parameters.proto" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
