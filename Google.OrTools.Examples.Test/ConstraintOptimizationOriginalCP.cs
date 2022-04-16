@@ -102,7 +102,7 @@ namespace im.irrational.Google.OrTools.Examples.Test
         [DataRow(11, 2680)]
         [DataRow(12, 14200)]
         [DataRow(13, 73712)]
-        [DataRow(14, 365596)]
+        // [DataRow(14, 365596)]
         // [DataRow(15, 1)]
         // [DataRow(16, 1)]
         public void NQueesProblem(int boardSize, int nSolutions)
