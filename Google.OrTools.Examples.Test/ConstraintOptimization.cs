@@ -172,5 +172,67 @@ namespace im.irrational.Google.OrTools.Examples.Test
             Assert.AreEqual(3, solver.Value(y));
             Assert.AreEqual(5, solver.Value(z));
         }
+
+        /// <summary>
+        /// https://developers.google.com/optimization/cp/cryptarithmetic
+        /// 
+        /// <code>
+        ///         CP
+        /// +       IS
+        /// +      FUM
+        /// ----------
+        /// =     TRUE
+        /// </code>
+        /// </summary>
+        [TestMethod]
+        public void CryptarithmeticPuzzle1()
+        {
+            // create model
+            CpModel model = new CpModel();
+
+            int kBase = 10;
+
+            IntVar c = model.NewIntVar(1, kBase - 1, "C");
+            IntVar p = model.NewIntVar(0, kBase - 1, "P");
+            IntVar i = model.NewIntVar(1, kBase - 1, "I");
+            IntVar s = model.NewIntVar(0, kBase - 1, "S");
+            IntVar f = model.NewIntVar(1, kBase - 1, "F");
+            IntVar u = model.NewIntVar(0, kBase - 1, "U");
+            IntVar n = model.NewIntVar(0, kBase - 1, "N");
+            IntVar t = model.NewIntVar(1, kBase - 1, "T");
+            IntVar r = model.NewIntVar(0, kBase - 1, "R");
+            IntVar e = model.NewIntVar(0, kBase - 1, "E");
+
+            // We need to group variables in a list to use the constraint AllDifferent.
+            IntVar[] letters = new IntVar[] { c, p, i, s, f, u, n, t, r, e };
+
+            // Define constraints
+            model.AddAllDifferent(letters);
+
+            // CP + IS + FUN = TRUE
+            model.Add(c * kBase + p + i * kBase + s + f * kBase * kBase + u * kBase + n ==
+                      t * kBase * kBase * kBase + r * kBase * kBase + u * kBase + e);
+
+            // creates a solver and solves the model
+            CpSolver solver = new CpSolver();
+            VarArraySolutionPrinter cb = new VarArraySolutionPrinter(letters);
+
+            // search for all solutions
+            solver.StringParameters = "enumerate_all_solutions:true";
+
+            // solve
+            CpSolverStatus status = solver.Solve(model, cb);
+
+            Console.WriteLine("Statistics");
+            Console.WriteLine($"  status    : {status}");
+            Console.WriteLine($"  conflicts : {solver.NumConflicts()}");
+            Console.WriteLine($"  branches  : {solver.NumBranches()}");
+            Console.WriteLine($"  wall time : {solver.WallTime()} s");
+            Console.WriteLine($"  number of solutions found: {cb.SolutionCount()}");
+
+            // assert
+            Assert.AreEqual(CpSolverStatus.Optimal, status);
+            Assert.AreEqual(72, cb.SolutionCount());
+        }
     }
 }
