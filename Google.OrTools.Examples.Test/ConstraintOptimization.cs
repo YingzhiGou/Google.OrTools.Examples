@@ -234,5 +234,112 @@ namespace im.irrational.Google.OrTools.Examples.Test
             Assert.AreEqual(CpSolverStatus.Optimal, status);
             Assert.AreEqual(72, cb.SolutionCount());
         }
+
+
+        public class NQSolutionPrinter : CpSolverSolutionCallback
+        {
+            public NQSolutionPrinter(IntVar[] queens)
+            {
+                queens_ = queens;
+            }
+
+            public override void OnSolutionCallback()
+            {
+                Console.WriteLine($"Solution {SolutionCount_}");
+                for (int i = 0; i < queens_.Length; ++i)
+                {
+                    for (int j = 0; j < queens_.Length; ++j)
+                    {
+                        if (Value(queens_[j]) == i)
+                        {
+                            Console.Write("Q");
+                        }
+                        else
+                        {
+                            Console.Write("_");
+                        }
+                        if (j != queens_.Length - 1)
+                            Console.Write(" ");
+                    }
+                    Console.WriteLine("");
+                }
+                SolutionCount_++;
+            }
+
+            public int SolutionCount()
+            {
+                return SolutionCount_;
+            }
+
+            private int SolutionCount_;
+            private IntVar[] queens_;
+        }
+
+        /// <summary>
+        /// https://developers.google.com/optimization/cp/queens
+        /// </summary>
+        [DataTestMethod]
+        [DataRow(1, 1)]
+        [DataRow(2, -1)]
+        [DataRow(3, -1)]
+        [DataRow(4, 2)]
+        [DataRow(5, 10)]
+        [DataRow(6, 4)]
+        [DataRow(7, 40)]
+        [DataRow(8, 92)]
+        [DataRow(9, 352)]
+        [DataRow(10, 724)]
+        [DataRow(11, 2680)]
+        [DataRow(12, 14200)]
+        // [DataRow(13, 73712)]
+        // [DataRow(14, 365596)]
+        // [DataRow(15, 1)]
+        // [DataRow(16, 1)]
+        public void NQueesProblem(int boardSize, int nSolutions)
+        {
+            // Constraint programming engine
+            CpModel model = new CpModel();
+
+            IntVar[] queens = new IntVar[boardSize];
+            for (int i = 0; i < boardSize; ++i)
+            {
+                queens[i] = model.NewIntVar(0, boardSize - 1, $"x{i}");
+            }
+
+            // Define constraints.
+            // All rows must be different.
+            model.AddAllDifferent(queens);
+
+            // All columns must be different because the indices of queens are all different.
+            // No two queens can be on the same diagonal.
+            LinearExpr[] diag1 = new LinearExpr[boardSize];
+            LinearExpr[] diag2 = new LinearExpr[boardSize];
+            for (int i = 0; i < boardSize; ++i)
+            {
+                diag1[i] = LinearExpr.Affine(queens[i], /*coeff=*/1, /*offset=*/i);
+                diag2[i] = LinearExpr.Affine(queens[i], /*coeff=*/1, /*offset=*/-i);
+            }
+
+            model.AddAllDifferent(diag1);
+            model.AddAllDifferent(diag2);
+
+            // Creates a solver and solves the model.
+            CpSolver solver = new CpSolver();
+            NQSolutionPrinter cb = new NQSolutionPrinter(queens);
+            // Search for all solutions.
+            solver.StringParameters = "enumerate_all_solutions:true";
+            // And solve.
+            CpSolverStatus status = solver.Solve(model, cb);
+            
+            Console.WriteLine("Statistics");
+            Console.WriteLine($"  status    : {status}");
+            Console.WriteLine($"  conflicts : {solver.NumConflicts()}");
+            Console.WriteLine($"  branches  : {solver.NumBranches()}");
+            Console.WriteLine($"  wall time : {solver.WallTime()} s");
+            Console.WriteLine($"  number of solutions found: {cb.SolutionCount()}");
+
+            Assert.AreEqual(nSolutions > 0 ? CpSolverStatus.Optimal : CpSolverStatus.Infeasible, status);
+            Assert.AreEqual(Math.Max(nSolutions, 0), cb.SolutionCount());
+        }
     }
 }
